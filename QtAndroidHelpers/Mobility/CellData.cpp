@@ -41,53 +41,107 @@
 
 namespace Mobility {
 
-CellData::CellData()
+
+CellData::Data::Data(uint32_t cell_id)
+	: cell_id_(cell_id)
 {
-	clear();
 }
 
 
-bool CellData::compare( const CellData& other, bool compareSignalStrength ) const
+bool CellData::Data::operator==(const CellData::Data & other) const
 {
-	if( cellId != other.cellId ||
-		locationAreaCode != other.locationAreaCode ||
-		mobileCountryCode != other.mobileCountryCode ||
-		mobileNetworkCode != other.mobileNetworkCode ||
-		timingAdvance != other.timingAdvance )
+	return cell_id_ == other.cell_id_
+		&& location_area_code_ == other.location_area_code_
+		&& mobile_country_code_ == other.mobile_country_code_
+		&& mobile_network_code_ == other.mobile_network_code_
+		&& signal_strength_ == other.signal_strength_
+		&& timing_advance_ == other.timing_advance_
+		;
+}
+
+
+bool CellData::Data::operator!=(const CellData::Data & other) const
+{
+	return !(*this == other);
+}
+
+
+void CellData::Data::hashData(QByteArray & data) const
+{
+	data.append("CellData::Data");
+
+	data.append("cell_id_");
+	data.append(QByteArray::number(cell_id_));
+
+	if (location_area_code_)
+	{
+		data.append("location_area_code_");
+		data.append(QByteArray::number(*location_area_code_));
+	}
+
+	if (mobile_country_code_)
+	{
+		data.append("mobile_country_code_");
+		data.append(QByteArray::number(*mobile_country_code_));
+	}
+
+	if (mobile_network_code_)
+	{
+		data.append("mobile_network_code_");
+		data.append(QByteArray::number(*mobile_network_code_));
+	}
+
+	if (signal_strength_)
+	{
+		data.append("signal_strength_");
+		data.append(QByteArray::number(*signal_strength_));
+	}
+
+	if (timing_advance_)
+	{
+		data.append("timing_advance_");
+		data.append(QByteArray::number(*timing_advance_));
+	}
+}
+
+
+void CellData::hashData(QByteArray & data) const
+{
+	data.append("CellData");
+	data.append(QByteArray::number(data_.size()));
+	data.append("#");
+	data.append(radio_type_);
+	data.append("#");
+
+	for (const auto & item : data_)
+	{
+		item.hashData(data);
+	}
+}
+
+
+bool CellData::operator==(const CellData & other) const
+{
+	if (radio_type_ != other.radio_type_ || data_.size() != other.data_.size())
 	{
 		return false;
 	}
-	if( compareSignalStrength  &&
-		signalStrength != other.signalStrength )
+
+	for (auto it1 = data_.cbegin(), it2 = other.data_.cbegin(); it1 != data_.cend(); ++it1, ++it2)
 	{
-		return false;
+		if (*it1 != *it2)
+		{
+			return false;
+		}
 	}
+
 	return true;
 }
 
 
-bool CellData::operator==(const CellData &other) const
+bool CellData::operator!=(const CellData & other) const
 {
-	return compare(other, true);
+	return !(*this == other);
 }
 
-
-bool CellData::operator!=(const CellData &other) const
-{
-	return !compare(other, true);
-}
-
-
-// used as sign of validity
-bool CellData::isEmpty() const
-{
-	return !(cellId && locationAreaCode && mobileCountryCode && mobileNetworkCode);
-}
-
-
-void CellData::clear()
-{
-	memset(this, 0, sizeof(*this));
-}
-
-}
+} // namespace Mobility

@@ -38,6 +38,7 @@
 
 #pragma once
 
+#include <boost/optional.hpp>
 #include <QtCore/QSharedPointer>
 
 
@@ -45,39 +46,44 @@ namespace Mobility {
 
 struct CellData
 {
-	CellData();
-	bool compare( const CellData& other, bool compareSignalStrength ) const;
-	bool operator==(const CellData& other) const;
-	bool operator!=(const CellData& other) const;
-	bool isEmpty() const; // used as sign of validity
-	void clear();
+	bool operator==(const CellData & other) const;
+	bool operator!=(const CellData & other) const;
+	void hashData(QByteArray & data) const;
 
-	// fields are described in http://code.google.com/intl/ru/apis/gears/geolocation_network_protocol.html
-	// Unique identifier of the cell. (CID for GSM, BID for CDMA)
-	int cellId;
+	struct Data
+	{
+		Data(uint32_t cell_id);
+		bool operator==(const CellData::Data & other) const;
+		bool operator!=(const CellData::Data & other) const;
+		void hashData(QByteArray & data) const;
 
-	// Location Area Code (LAC for GSM, NID for CDMA)
-	int locationAreaCode;
+		// обязательный, int. Уникальный идентификатор соты. 32-битное положительное число.
+		// Cell ID (CID) для GSM-сетей
+		// Base Station ID (BID) для CDMA-сетей
+		// UTRAN/GERAN Cell Identity (UC-Id) для WCDMA-сетей.
+		uint32_t cell_id_;
 
-	// Mobile Country Code (MCC for GSM and CDMA)
-	int mobileCountryCode;
+		// необязательный, int.
+		// Location Area Code (LAC) для GSM and WCDMA сетей.
+		// Network ID (NID) для CDMA сетей. Число от 0 до 65535.
+		boost::optional<uint16_t> location_area_code_;
 
-	// Mobile Network Code (MNC for GSM, SID for CDMA)
-	int mobileNetworkCode;
+		// необязательный, int. 0 <= MCC < 1000
+		boost::optional<uint16_t> mobile_country_code_;
 
-	// Radio signal strength measured in dBm.
-	/* convert GSM asu (TS 27.007 8.5) to these as follows:
-	<rssi>:
-	0 -113 dBm or less
-	1 -111 dBm
-	2...30 -109... -53 dBm
-	31 -51 dBm or greater
-	99 not known or not detectable
-	*/
-	int signalStrength;
+		// необязательный, int. 0 <= MNC < 1000
+		boost::optional<uint16_t> mobile_network_code_;
 
-	// Represents the distance from the cell tower. Each unit is roughly 550 meters.
-	int timingAdvance;
+		// необязательный, int. RSSI в dBm.
+		boost::optional<int32_t> signal_strength_;
+
+		// необязательный, int
+		boost::optional<int32_t> timing_advance_;
+	};
+
+	typedef QList<Data> DataColl;
+	DataColl data_;
+	QString radio_type_;
 };
 
 

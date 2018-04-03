@@ -2,9 +2,9 @@
 	Offscreen Android Views library for Qt
 
 	Authors:
-	Vyacheslav O. Koscheev <vok1980@gmail.com>
-	Ivan Avdeev marflon@gmail.com
-	Sergey A. Galin sergey.galin@gmail.com
+		Vyacheslav O. Koscheev <vok1980@gmail.com>
+		Ivan Avdeev marflon@gmail.com
+		Sergey A. Galin sergey.galin@gmail.com
 
 	Distrbuted under The BSD License
 
@@ -37,23 +37,32 @@
 */
 
 #include "QAndroidCellDataProvider.h"
+
 #include <QAndroidQPAPluginGap.h>
 #include "TJniObjectLinker.h"
 
 
 namespace Mobility {
 
-Q_DECL_EXPORT void JNICALL Java_CellListener_cellUpdate(JNIEnv *, jobject, jlong native_ptr, jint cid, jint lac, jint mcc, jint mnc, jint rssi)
+
+Q_DECL_EXPORT void JNICALL Java_CellListener_cellUpdate(JNIEnv *, jobject, jlong native_ptr, jstring type, jint cid, jint lac, jint mcc, jint mnc, jint rssi, jint ta)
 {
 	JNI_LINKER_OBJECT(Mobility::QAndroidCellDataProvider, native_ptr, proxy)
-	proxy->cellUpdate(cid, lac, mcc, mnc, rssi);
+	proxy->cellUpdate(type, cid, lac, mcc, mnc, rssi, ta);
+}
+
+
+Q_DECL_EXPORT void JNICALL Java_CellListener_onSignalChanged(JNIEnv *, jobject, jlong native_ptr)
+{
+	JNI_LINKER_OBJECT(Mobility::QAndroidCellDataProvider, native_ptr, proxy)
+	proxy->onSignalChanged();
 }
 
 
 static const JNINativeMethod methods[] = {
 	{"getContext", "()Landroid/content/Context;", reinterpret_cast<void*>(QAndroidQPAPluginGap::getCurrentContextNoThrow)},
-	// private native void cellUpdate(long native_ptr, int cid, int lac, int mcc, int mnc, int rssi);
-	{"cellUpdate", "(JIIIII)V", reinterpret_cast<void*>(Java_CellListener_cellUpdate)},
+	{"onSignalChanged", "(J)V", reinterpret_cast<void*>(Java_CellListener_onSignalChanged)},
+	{"cellUpdate", "(JLjava/lang/String;IIIIII)V", reinterpret_cast<void*>(Java_CellListener_cellUpdate)},
 };
 
 
@@ -76,8 +85,8 @@ void QAndroidCellDataProvider::start()
 {
 	if (isJniReady())
 	{
-		jni()->callBool("start");	
-	}	
+		jni()->callBool("start");
+	}
 }
 
 
@@ -90,31 +99,75 @@ void QAndroidCellDataProvider::stop()
 }
 
 
-void QAndroidCellDataProvider::cellUpdate(int cid, int lac, int mcc, int mnc, int rssi)
+void QAndroidCellDataProvider::onSignalChanged()
 {
-	CellDataPtr new_data(new CellData);
-	new_data->cellId = cid;
-	new_data->locationAreaCode = lac;
-	new_data->mobileCountryCode = mcc;
-	new_data->mobileNetworkCode = mnc;
-	new_data->signalStrength = rssi;
-	new_data->timingAdvance = 0;
+	emit updated();
+}
 
-	if (last_data_)
+
+void QAndroidCellDataProvider::requestData()
+{
+	current_data_ = CellDataPtr::create();
+
+	if (isJniReady())
 	{
-		if (*new_data==*last_data_)
+		jni()->callVoid("requestData");
+
 		{
-			return;
+			QWriteLocker locker(&lock_data_);
+			last_data_ = current_data_;
+		}
+
+		emit dataReady();
+	}
+}
+
+
+void QAndroidCellDataProvider::cellUpdate(jstring type, jint cid, jint lac, jint mcc, jint mnc, jint rssi, jint ta)
+{
+	static const int32_t java_integer_max_value = std::numeric_limits<int32_t>::max();
+
+	if (current_data_ && cid > 0 && cid != java_integer_max_value)
+	{
+		if (isJniReady())
+		{
+			QJniEnvPtr jep;
+			current_data_->radio_type_ = jep.JStringToQString(type);
+		}
+
+		current_data_->data_.push_back(CellData::Data(uint32_t(cid)));
+
+		if (lac >= 0 && lac <= 0xffff)
+		{
+			current_data_->data_.back().location_area_code_ = lac;
+		}
+
+		if (mcc >= 0 && mcc <= 999)
+		{
+			current_data_->data_.back().mobile_country_code_ = mcc;
+		}
+
+		if (mnc >= 0 && mnc <= 999)
+		{
+			current_data_->data_.back().mobile_network_code_ = mnc;
+		}
+
+		if (rssi < java_integer_max_value)
+		{
+			current_data_->data_.back().signal_strength_ = rssi;
+		}
+
+		if (ta >= 0 && ta < java_integer_max_value)
+		{
+			current_data_->data_.back().timing_advance_ = ta;
 		}
 	}
-	
-	last_data_ = new_data;
-	emit update();
 }
 
 
 CellDataPtr QAndroidCellDataProvider::getLastData()
 {
+	QReadLocker locker(&lock_data_);
 	return last_data_;
 }
 
