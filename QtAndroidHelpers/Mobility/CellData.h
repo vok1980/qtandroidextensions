@@ -2,9 +2,9 @@
     Offscreen Android Views library for Qt
 
     Authors:
-    Vyacheslav O. Koscheev <vok1980@gmail.com>
-    Ivan Avdeev marflon@gmail.com
-    Sergey A. Galin sergey.galin@gmail.com
+        Vyacheslav O. Koscheev <vok1980@gmail.com>
+        Ivan Avdeev marflon@gmail.com
+        Sergey A. Galin sergey.galin@gmail.com
 
     Distrbuted under The BSD License
 
