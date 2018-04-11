@@ -46,15 +46,11 @@ namespace Mobility {
 
 struct CellData
 {
-	bool operator==(const CellData & other) const;
-	bool operator!=(const CellData & other) const;
 	void hashData(QByteArray & data) const;
 
 	struct Data
 	{
 		Data(uint32_t cell_id);
-		bool operator==(const CellData::Data & other) const;
-		bool operator!=(const CellData::Data & other) const;
 		void hashData(QByteArray & data) const;
 
 		// обязательный, int. Уникальный идентификатор соты. 32-битное положительное число.

@@ -48,24 +48,6 @@ CellData::Data::Data(uint32_t cell_id)
 }
 
 
-bool CellData::Data::operator==(const CellData::Data & other) const
-{
-	return cell_id_ == other.cell_id_
-		&& location_area_code_ == other.location_area_code_
-		&& mobile_country_code_ == other.mobile_country_code_
-		&& mobile_network_code_ == other.mobile_network_code_
-		&& signal_strength_ == other.signal_strength_
-		&& timing_advance_ == other.timing_advance_
-		;
-}
-
-
-bool CellData::Data::operator!=(const CellData::Data & other) const
-{
-	return !(*this == other);
-}
-
-
 void CellData::Data::hashData(QByteArray & data) const
 {
 	data.append("CellData::Data");
@@ -117,31 +99,6 @@ void CellData::hashData(QByteArray & data) const
 	{
 		item.hashData(data);
 	}
-}
-
-
-bool CellData::operator==(const CellData & other) const
-{
-	if (radio_type_ != other.radio_type_ || data_.size() != other.data_.size())
-	{
-		return false;
-	}
-
-	for (auto it1 = data_.cbegin(), it2 = other.data_.cbegin(); it1 != data_.cend(); ++it1, ++it2)
-	{
-		if (*it1 != *it2)
-		{
-			return false;
-		}
-	}
-
-	return true;
-}
-
-
-bool CellData::operator!=(const CellData & other) const
-{
-	return !(*this == other);
 }
 
 } // namespace Mobility
