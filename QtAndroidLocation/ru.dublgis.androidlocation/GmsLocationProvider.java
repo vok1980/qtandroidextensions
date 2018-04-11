@@ -100,8 +100,8 @@ public class GmsLocationProvider
 
 	private class RequestHolder {
 		public long mRequestId;
-		LocationRequest mRequest = null;
-		LocationCallback mCallback = null;
+		private LocationRequest mRequest = null;
+		private LocationCallback mCallback = null;
 
 		RequestHolder(long id, LocationRequest request, LocationCallback callback) {
 			mRequestId = id;
