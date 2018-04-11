@@ -53,27 +53,27 @@ struct CellData
 		Data(uint32_t cell_id);
 		void hashData(QByteArray & data) const;
 
-		// обязательный, int. Уникальный идентификатор соты. 32-битное положительное число.
-		// Cell ID (CID) для GSM-сетей
-		// Base Station ID (BID) для CDMA-сетей
-		// UTRAN/GERAN Cell Identity (UC-Id) для WCDMA-сетей.
+		// required, int.
+		// Cell ID (CID) for GSM
+		// Base Station ID (BID) for CDMA
+		// UTRAN/GERAN Cell Identity (UC-Id) for WCDMA.
 		uint32_t cell_id_;
 
-		// необязательный, int.
-		// Location Area Code (LAC) для GSM and WCDMA сетей.
-		// Network ID (NID) для CDMA сетей. Число от 0 до 65535.
+		// optional, int.
+		// Location Area Code (LAC) for GSM and WCDMA.
+		// Network ID (NID) for CDMA сетей. 0 <= LAC <= 65535.
 		boost::optional<uint16_t> location_area_code_;
 
-		// необязательный, int. 0 <= MCC < 1000
+		// optional, int. 0 <= MCC < 1000
 		boost::optional<uint16_t> mobile_country_code_;
 
-		// необязательный, int. 0 <= MNC < 1000
+		// optional, int. 0 <= MNC < 1000
 		boost::optional<uint16_t> mobile_network_code_;
 
-		// необязательный, int. RSSI в dBm.
+		// optional, int. RSSI в dBm.
 		boost::optional<int32_t> signal_strength_;
 
-		// необязательный, int
+		// optional, int
 		boost::optional<int32_t> timing_advance_;
 	};
 
