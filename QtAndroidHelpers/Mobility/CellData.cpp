@@ -42,62 +42,52 @@
 namespace Mobility {
 
 
-CellData::Data::Data(uint32_t cell_id)
+const int32_t CellData::java_integer_max_value = std::numeric_limits<int32_t>::max();
+
+
+CellData::Data::Data(int32_t cell_id)
 	: cell_id_(cell_id)
+	, location_area_code_(java_integer_max_value)
+	, mobile_country_code_(java_integer_max_value)
+	, mobile_network_code_(java_integer_max_value)
+	, signal_strength_(java_integer_max_value)
+	, timing_advance_(java_integer_max_value)
 {
 }
 
 
-void CellData::Data::hashData(QByteArray & data) const
+void CellData::Data::accept(DataOperation & operation) const
 {
-	data.append("CellData::Data");
+	operation.execute(QStringLiteral("cell_id"), cell_id_);
 
-	data.append("cell_id_");
-	data.append(QByteArray::number(cell_id_));
-
-	if (location_area_code_)
+	if (location_area_code_ >= 0 && location_area_code_ <= 0xffff)
 	{
-		data.append("location_area_code_");
-		data.append(QByteArray::number(*location_area_code_));
+		operation.execute(QStringLiteral("location_area_code"), location_area_code_);
 	}
 
-	if (mobile_country_code_)
+	if (mobile_country_code_ >= 0 && mobile_country_code_ <= 999)
 	{
-		data.append("mobile_country_code_");
-		data.append(QByteArray::number(*mobile_country_code_));
+		operation.execute(QStringLiteral("mobile_country_code"), mobile_country_code_);
 	}
 
-	if (mobile_network_code_)
+	if (mobile_network_code_ >= 0 && mobile_network_code_ <= 999)
 	{
-		data.append("mobile_network_code_");
-		data.append(QByteArray::number(*mobile_network_code_));
+		operation.execute(QStringLiteral("mobile_network_code"), mobile_network_code_);
 	}
 
-	if (signal_strength_)
+	if (signal_strength_ < java_integer_max_value)
 	{
-		data.append("signal_strength_");
-		data.append(QByteArray::number(*signal_strength_));
+		operation.execute(QStringLiteral("signal_strength"), signal_strength_);
 	}
 
-	if (timing_advance_)
+	if (timing_advance_ >= 0 && timing_advance_ < java_integer_max_value)
 	{
-		data.append("timing_advance_");
-		data.append(QByteArray::number(*timing_advance_));
+		operation.execute(QStringLiteral("timing_advance"), timing_advance_);
 	}
-}
 
-
-void CellData::hashData(QByteArray & data) const
-{
-	data.append("CellData");
-	data.append(QByteArray::number(data_.size()));
-	data.append("#");
-	data.append(radio_type_);
-	data.append("#");
-
-	for (const auto & item : data_)
+	if (!radio_type_.isEmpty())
 	{
-		item.hashData(data);
+		operation.execute(QStringLiteral("radio_type"), radio_type_);
 	}
 }
 

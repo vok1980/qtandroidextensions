@@ -38,7 +38,6 @@
 
 #pragma once
 
-#include <boost/optional.hpp>
 #include <QtCore/QSharedPointer>
 
 
@@ -46,40 +45,46 @@ namespace Mobility {
 
 struct CellData
 {
-	void hashData(QByteArray & data) const;
+	struct DataOperation
+	{
+		virtual void execute(const QString & key, int32_t value) = 0;
+		virtual void execute(const QString & key, const QString & value) = 0;
+	};
 
 	struct Data
 	{
-		Data(uint32_t cell_id);
-		void hashData(QByteArray & data) const;
+		Data(int32_t cell_id);
+		void accept(DataOperation & operation) const;
 
 		// required, int.
 		// Cell ID (CID) for GSM
 		// Base Station ID (BID) for CDMA
 		// UTRAN/GERAN Cell Identity (UC-Id) for WCDMA.
-		uint32_t cell_id_;
+		int32_t cell_id_;
 
 		// optional, int.
 		// Location Area Code (LAC) for GSM and WCDMA.
 		// Network ID (NID) for CDMA сетей. 0 <= LAC <= 65535.
-		boost::optional<uint16_t> location_area_code_;
+		int32_t location_area_code_;
 
 		// optional, int. 0 <= MCC < 1000
-		boost::optional<uint16_t> mobile_country_code_;
+		int32_t mobile_country_code_;
 
 		// optional, int. 0 <= MNC < 1000
-		boost::optional<uint16_t> mobile_network_code_;
+		int32_t mobile_network_code_;
 
 		// optional, int. RSSI в dBm.
-		boost::optional<int32_t> signal_strength_;
+		int32_t signal_strength_;
 
 		// optional, int
-		boost::optional<int32_t> timing_advance_;
+		int32_t timing_advance_;
+
+		QString radio_type_;
 	};
 
 	typedef QList<Data> DataColl;
 	DataColl data_;
-	QString radio_type_;
+	static const int32_t java_integer_max_value;
 };
 
 

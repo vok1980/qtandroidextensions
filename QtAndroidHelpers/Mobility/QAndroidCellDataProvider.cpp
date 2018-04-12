@@ -129,38 +129,19 @@ void QAndroidCellDataProvider::cellUpdate(jstring type, jint cid, jint lac, jint
 
 	if (current_data_ && cid > 0 && cid != java_integer_max_value)
 	{
+		current_data_->data_.push_back(CellData::Data(cid));
+
 		if (isJniReady())
 		{
 			QJniEnvPtr jep;
-			current_data_->radio_type_ = jep.JStringToQString(type);
+			current_data_->data_.back().radio_type_ = jep.JStringToQString(type);
 		}
 
-		current_data_->data_.push_back(CellData::Data(uint32_t(cid)));
-
-		if (lac >= 0 && lac <= 0xffff)
-		{
-			current_data_->data_.back().location_area_code_ = lac;
-		}
-
-		if (mcc >= 0 && mcc <= 999)
-		{
-			current_data_->data_.back().mobile_country_code_ = mcc;
-		}
-
-		if (mnc >= 0 && mnc <= 999)
-		{
-			current_data_->data_.back().mobile_network_code_ = mnc;
-		}
-
-		if (rssi < java_integer_max_value)
-		{
-			current_data_->data_.back().signal_strength_ = rssi;
-		}
-
-		if (ta >= 0 && ta < java_integer_max_value)
-		{
-			current_data_->data_.back().timing_advance_ = ta;
-		}
+		current_data_->data_.back().location_area_code_ = lac;
+		current_data_->data_.back().mobile_country_code_ = mcc;
+		current_data_->data_.back().mobile_network_code_ = mnc;
+		current_data_->data_.back().signal_strength_ = rssi;
+		current_data_->data_.back().timing_advance_ = ta;
 	}
 }
 
