@@ -174,7 +174,7 @@ public class CellListener {
                             native_ptr_,
                             "lte",
                             cellInfoLte.getCellIdentity().getCi(), // 28-bit Cell Identity, Integer.MAX_VALUE if unknown
-                            Integer.MAX_VALUE,
+                            cellInfoLte.getCellIdentity().getTac(), // 16-bit Tracking Area Code, Integer.MAX_VALUE if unknown
                             cellInfoLte.getCellIdentity().getMcc(), // 3-digit Mobile Country Code, 0..999, Integer.MAX_VALUE if unknown
                             cellInfoLte.getCellIdentity().getMnc(), // 2 or 3-digit Mobile Network Code, 0..999, Integer.MAX_VALUE if unknown
                             cellInfoLte.getCellSignalStrength().getDbm(), // Get signal strength as dBm
